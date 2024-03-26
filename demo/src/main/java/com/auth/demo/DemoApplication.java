@@ -1,4 +1,4 @@
-package com.oauth.demo;
+package com.auth.demo;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
