@@ -7,15 +7,17 @@ spring:
       demo
   security:
     oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: https://accounts.google.com
-          jwk-set-uri: https://www.googleapis.com/oauth2/v3/certs
       client:
         registration:
           google:
-            client-id: 1062665072865-8dhbc8sil84rgpmsmoleou1v86244qt0.apps.googleusercontent.com
-            client-secret: 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
+            clientId: 1062665072865-8dhbc8sil84rgpmsmoleou1v86244qt0.apps.googleusercontent.com
+            clientSecret: "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"
+            redirectURI: "http://localhost/8090/oauth2/callback/{registrationId}"
+            scope: openid, profile, email
+google:
+            clientId: 1062665072865-8dhbc8sil84rgpmsmoleou1v86244qt0.apps.googleusercontent.com
+            clientSecret: "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"
+            redirectURI: "http://localhost/8090/oauth2/callback/{registrationId}"
             scope: openid, profile, email
 
 logging:

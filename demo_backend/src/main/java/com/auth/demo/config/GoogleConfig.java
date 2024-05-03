@@ -1,13 +1,16 @@
 package com.auth.demo.config;
 
+import com.google.api.client.util.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConfigurationProperties(prefix = "client.registration.google")
+@ConfigurationProperties(prefix = "google")
 public class GoogleConfig {
 
+
     private String clientId;
+    @Value("${client-secret}")
     private String clientSecret;
     private String scope;
 
