@@ -2,6 +2,8 @@ import {useState, useEffect} from 'react';
 
 const Dash = () => {
 
+  let [idToken, setIdToken] = useState('');
+
 
   // When the user is redirected here... get the token 
   useEffect(() => {
@@ -15,11 +17,26 @@ const Dash = () => {
       params[key] = value
     })
 
+    // let fetchIdToken = async () => {
+    //   try {
+    //     const response = await fetch('https://openidconnect.googleapis.com/v1/userinfo', {
+    //       headers: {
+    //         'Authorization': `${params['token_type']} ${params['access_token']}`
+    //       }
+    //     });
+
+    //     const data = await response.json();
+    //     setIdToken(data);
+    //   } catch (error) {
+    //     console.error('Error fetching ID token:', error);
+    //   }
+    // }
+
     let fetchData = async() => {
-      let response = await fetch('http://localhost:8090/login/oauth2/google',{
+      let response = await fetch('http://localhost:8090/oauth2/google',{
           method: 'POST',
           headers :{
-            'Authorization': `${params['token_type']} ${params['access_token']}`,
+            'Authorization': `${params['id_token']}`,
             'Content-Type': 'application/json'
           }
         }
@@ -33,6 +50,10 @@ const Dash = () => {
     console.log(params)
     console.log(fetchData())
   }, [])
+
+  useEffect(() => {
+    console.log(idToken);
+  }, [idToken])
 
 
   return(

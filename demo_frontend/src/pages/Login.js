@@ -12,7 +12,7 @@ function Login () {
         client_id: '1062665072865-8dhbc8sil84rgpmsmoleou1v86244qt0.apps.googleusercontent.com',
         redirect_uri: 'http://localhost:3000/dashboard',
         scope: 'email profile openid',
-        response_type: 'token',
+        response_type: 'id_token',
         prompt: 'consent'
       });
 
