@@ -4,6 +4,7 @@ import com.auth.demo.jpa.dto.GoogleUserDTO;
 import com.auth.demo.jpa.model.GoogleUser;
 import com.auth.demo.jpa.repository.GoogleUserRepository;
 import com.auth.demo.jpa.service.GoogleUserService;
+import com.auth.demo.service.JwtGeneratorService;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -32,11 +33,16 @@ public class OAuth2Controller {
     private final GoogleConfig googleConfig;
     private final GoogleUserService googleUserService;
     private final GoogleUserRepository googleUserRepository;
+    private final JwtGeneratorService jwtGeneratorService;
 
-    public OAuth2Controller (GoogleConfig googleConfig, GoogleUserService googleUserService, GoogleUserRepository googleUserRepository) {
+    public OAuth2Controller (GoogleConfig googleConfig,
+                             GoogleUserService googleUserService,
+                             GoogleUserRepository googleUserRepository,
+                             JwtGeneratorService jwtGeneratorService) {
         this.googleConfig = googleConfig;
         this.googleUserService = googleUserService;
         this.googleUserRepository = googleUserRepository;
+        this.jwtGeneratorService = jwtGeneratorService;
     }
 
     @CrossOrigin(origins="http://localhost:3000", allowCredentials ="true")
@@ -70,33 +76,35 @@ public class OAuth2Controller {
                 System.out.println("user id is " + userId);
                 System.out.println("user email is " + email);
 
+                // if user does not exist create
+
                 System.out.println("find by google id");
 
                 Optional<GoogleUser> existingUser = googleUserRepository.findByGoogleId(userId);
+                System.out.println("Found user is " + existingUser.isPresent());
                 GoogleUser validUser = existingUser.orElse(null);
 
-                // if user does not exist create
-                Lock lock = new ReentrantLock();
-                lock.lock();
-                try {
-                    if (existingUser.isEmpty()) {
-                        GoogleUserDTO newUser = new GoogleUserDTO();
-                        newUser.setGoogleId(userId);
-                        newUser.setGoogleEmail(email);
+                if (!existingUser.isPresent()) {
+                    GoogleUserDTO newUser = new GoogleUserDTO();
+                    newUser.setGoogleId(userId);
+                    newUser.setGoogleEmail(email);
 
-                        validUser = googleUserService.save(newUser);
-                    }
-                } finally {
-                    lock.unlock();
+                    validUser = googleUserService.save(newUser);
                 }
 
                 System.out.println("valid user is " + validUser);
 
+                //test verify method shoul be false
+//                System.out.println("test verify token" + jwtGeneratorService.validateToken("token"));
+
+                String newToken = jwtGeneratorService.generateToken(userId);
+
                 // Create a response map with the user's information
                 Map<String, Object> responseMap = new HashMap<>();
-                responseMap.put("userId", userId);
-                responseMap.put("email", email);
+                responseMap.put("userId", validUser.getGoogleId());
+                responseMap.put("jwToken", newToken);
                 return ResponseEntity.ok(responseMap);
+
             } else {
                 return ResponseEntity.badRequest().body("Invalid access token");
             }
