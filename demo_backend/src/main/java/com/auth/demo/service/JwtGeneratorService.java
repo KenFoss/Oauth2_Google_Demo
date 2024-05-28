@@ -21,7 +21,6 @@ public class JwtGeneratorService {
     private String JWT_SECRET = "ieBJfAscbYrOSA+Wp7F5QLAIN8uCM5U/wMXM/2nCsbU";
 
     public String generateToken(String googleId) {
-//        String username= authentication.get();
         Date currentDate = new Date();
         Date expiryDate = new Date(currentDate.getTime()+ JWT_EXPIRY);
 
@@ -40,7 +39,7 @@ public class JwtGeneratorService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String getUsernameFromJWT(String token) {
+    public String getGoogleIdFromJWT(String token) {
         Claims claims = Jwts.parser()
                 .verifyWith(getSignInKey())
                 .build()

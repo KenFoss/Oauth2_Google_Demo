@@ -48,7 +48,6 @@ public class OAuth2Controller {
     @CrossOrigin(origins="http://localhost:3000", allowCredentials ="true")
     @PostMapping("/oauth2/google")
     public ResponseEntity<Object> oauth2Callback(@RequestHeader(name = "Authorization") String authorizationHeader) {
-        System.out.println("header is " + authorizationHeader);
 
         try {
             // Extract the access token from the Authorization header
@@ -59,32 +58,23 @@ public class OAuth2Controller {
                     .setAudience(Collections.singletonList(googleConfig.getClientId()))
                     .build();
 
-            System.out.println("verifier");
-            System.out.println(verifier.toString());
-
-            System.out.println("client id " + googleConfig.getClientId());
-            System.out.println("access token is " + accessToken);
-
             GoogleIdToken idToken = verifier.verify(accessToken);
-            System.out.println("id token is " + idToken.toString());
+
             if (verifier.verify(accessToken) != null) {
+                System.out.println("verified token");
                 GoogleIdToken.Payload payload = idToken.getPayload();
 
                 // Get the user's Google ID and email
                 String userId = payload.getSubject();
                 String email = payload.getEmail();
-                System.out.println("user id is " + userId);
-                System.out.println("user email is " + email);
 
                 // if user does not exist create
 
-                System.out.println("find by google id");
-
                 Optional<GoogleUser> existingUser = googleUserRepository.findByGoogleId(userId);
-                System.out.println("Found user is " + existingUser.isPresent());
                 GoogleUser validUser = existingUser.orElse(null);
 
                 if (!existingUser.isPresent()) {
+                    System.out.println("Registering new user.");
                     GoogleUserDTO newUser = new GoogleUserDTO();
                     newUser.setGoogleId(userId);
                     newUser.setGoogleEmail(email);
@@ -92,32 +82,28 @@ public class OAuth2Controller {
                     validUser = googleUserService.save(newUser);
                 }
 
-                System.out.println("valid user is " + validUser);
-
-                //test verify method shoul be false
-//                System.out.println("test verify token" + jwtGeneratorService.validateToken("token"));
-
+                // Generate a JWT to represent this user in our application.
                 String newToken = jwtGeneratorService.generateToken(userId);
 
                 // Create a response map with the user's information
                 Map<String, Object> responseMap = new HashMap<>();
-                responseMap.put("userId", validUser.getGoogleId());
+                responseMap.put("userEmail", validUser.getEmail());
                 responseMap.put("jwToken", newToken);
                 return ResponseEntity.ok(responseMap);
 
             } else {
                 return ResponseEntity.badRequest().body("Invalid access token");
             }
-        } catch (GeneralSecurityException | IOException e) {
+        } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error verifying access token: " + e.getMessage());
         }
     }
 
-
-    @GetMapping("/csrf")
+    @CrossOrigin(origins="http://localhost:3000", allowCredentials ="true")
+    @GetMapping("/oauth2/is-authenticated")
     public ResponseEntity<Object> getCsrf(){
-        Map<String,String> responseMap = new HashMap<>();
-        responseMap.put("messsage", "csrf assigned to cookies");
+        Map<String,Boolean> responseMap = new HashMap<>();
+        responseMap.put("isAuthenticated", true);
         return ResponseEntity.ok(responseMap);
     }
 }
