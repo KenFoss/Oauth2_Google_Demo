@@ -101,7 +101,7 @@ public class OAuth2Controller {
 
     @CrossOrigin(origins="http://localhost:3000", allowCredentials ="true")
     @GetMapping("/oauth2/is-authenticated")
-    public ResponseEntity<Object> getCsrf(){
+    public ResponseEntity<Object> isAuthenticated(){
         Map<String,Boolean> responseMap = new HashMap<>();
         responseMap.put("isAuthenticated", true);
         return ResponseEntity.ok(responseMap);
